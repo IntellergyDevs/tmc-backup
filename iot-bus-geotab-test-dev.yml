@@ -1,0 +1,4733 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "The AWS CloudFormation template for this Serverless application",
+    "Resources": {
+        "ServerlessDeploymentBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketEncryption": {
+                    "ServerSideEncryptionConfiguration": [
+                        {
+                            "ServerSideEncryptionByDefault": {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "ServerlessDeploymentBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": {
+                    "Ref": "ServerlessDeploymentBucket"
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "s3:*",
+                            "Effect": "Deny",
+                            "Principal": "*",
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:",
+                                            {
+                                                "Ref": "AWS::Partition"
+                                            },
+                                            ":s3:::",
+                                            {
+                                                "Ref": "ServerlessDeploymentBucket"
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:",
+                                            {
+                                                "Ref": "AWS::Partition"
+                                            },
+                                            ":s3:::",
+                                            {
+                                                "Ref": "ServerlessDeploymentBucket"
+                                            }
+                                        ]
+                                    ]
+                                }
+                            ],
+                            "Condition": {
+                                "Bool": {
+                                    "aws:SecureTransport": false
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "AppropriateBusListLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-appropriateBusList"
+            }
+        },
+        "AvailableRoutesLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-availableRoutes"
+            }
+        },
+        "AvailableBusesLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-availableBuses"
+            }
+        },
+        "GetSelectedBusLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getSelectedBus"
+            }
+        },
+        "GetAllBusesLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getAllBuses"
+            }
+        },
+        "GetAllStaticDetailsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getAllStaticDetails"
+            }
+        },
+        "GetDriverRatingsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getDriverRatings"
+            }
+        },
+        "GetBusesStationEtaDataLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getBusesStationEtaData"
+            }
+        },
+        "GetBusesStationEtaDataCombineLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getBusesStationEtaDataCombine"
+            }
+        },
+        "UserGetStaticDetailsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-userGetStaticDetails"
+            }
+        },
+        "GeoGetBusExceptionsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-geoGetBusExceptions"
+            }
+        },
+        "GetBusLocationTraceLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getBusLocationTrace"
+            }
+        },
+        "GetAllTrainStopsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getAllTrainStops"
+            }
+        },
+        "GetTrainRouteLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getTrainRoute"
+            }
+        },
+        "GetStopsWithin10kmLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getStopsWithin10km"
+            }
+        },
+        "RegisterFcmDeviceLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-registerFcmDevice"
+            }
+        },
+        "SendPushNotificationsiOSLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-sendPushNotificationsiOS"
+            }
+        },
+        "SendPushNotificationsAndroidLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-sendPushNotificationsAndroid"
+            }
+        },
+        "GetFirebaseCalculationsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getFirebaseCalculations"
+            }
+        },
+        "AddContactLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-addContact"
+            }
+        },
+        "GetNotificationsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getNotifications"
+            }
+        },
+        "GetMessageBoardLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getMessageBoard"
+            }
+        },
+        "GetGtNewsLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+                "LogGroupName": "/aws/lambda/iot-bus-geotab-test-dev-getGtNews"
+            }
+        },
+        "IamRoleLambdaExecution": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Policies": [
+                    {
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "iot-bus-geotab-test",
+                                    "dev",
+                                    "lambda"
+                                ]
+                            ]
+                        },
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:CreateLogStream",
+                                        "logs:CreateLogGroup"
+                                    ],
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/iot-bus-geotab-test-dev*:*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Resource": [
+                                        {
+                                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/iot-bus-geotab-test-dev*:*:*"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "Effect": "Allow",
+                                    "Action": [
+                                        "*"
+                                    ],
+                                    "Resource": "*"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "Path": "/",
+                "RoleName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "iot-bus-geotab-test",
+                            "dev",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            "lambdaRole"
+                        ]
+                    ]
+                }
+            }
+        },
+        "AppropriateBusListLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/busRoutesController.getAppropriateBuses",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-appropriateBusList",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "AppropriateBusListLogGroup"
+            ]
+        },
+        "AvailableRoutesLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/busRoutesController.getAllRoutes",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-availableRoutes",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "AvailableRoutesLogGroup"
+            ]
+        },
+        "AvailableBusesLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/busRoutesController.getAllAvailableBuses",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-availableBuses",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "AvailableBusesLogGroup"
+            ]
+        },
+        "GetSelectedBusLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/busRoutesController.getAvailableBuses",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getSelectedBus",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetSelectedBusLogGroup"
+            ]
+        },
+        "GetAllBusesLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/trackingController.getAllBuses",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getAllBuses",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetAllBusesLogGroup"
+            ]
+        },
+        "GetAllStaticDetailsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/trackingController.getAllStaticDetails",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getAllStaticDetails",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetAllStaticDetailsLogGroup"
+            ]
+        },
+        "GetDriverRatingsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/trackingController.getDriverRatings",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getDriverRatings",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetDriverRatingsLogGroup"
+            ]
+        },
+        "GetBusesStationEtaDataLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/trackingController.getBusesStationEtaData",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getBusesStationEtaData",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetBusesStationEtaDataLogGroup"
+            ]
+        },
+        "GetBusesStationEtaDataCombineLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/trackingController.getBusesStationEtaDataCombine",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getBusesStationEtaDataCombine",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetBusesStationEtaDataCombineLogGroup"
+            ]
+        },
+        "UserGetStaticDetailsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/trackingController.userGetStaticDetails",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-userGetStaticDetails",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "UserGetStaticDetailsLogGroup"
+            ]
+        },
+        "GeoGetBusExceptionsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/geoTabTrackingControllers.getBusExceptions",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-geoGetBusExceptions",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GeoGetBusExceptionsLogGroup"
+            ]
+        },
+        "GetBusLocationTraceLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/geoTabTrackingControllers.getBusLocationTrace",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getBusLocationTrace",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetBusLocationTraceLogGroup"
+            ]
+        },
+        "GetAllTrainStopsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/trainController.getTrainStops",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getAllTrainStops",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetAllTrainStopsLogGroup"
+            ]
+        },
+        "GetTrainRouteLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/trainController.getTrainRoute",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getTrainRoute",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetTrainRouteLogGroup"
+            ]
+        },
+        "GetStopsWithin10kmLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/trainController.getStopsWithin10km",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getStopsWithin10km",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetStopsWithin10kmLogGroup"
+            ]
+        },
+        "RegisterFcmDeviceLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/firebaseController.registerFcmDevice",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-registerFcmDevice",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "RegisterFcmDeviceLogGroup"
+            ]
+        },
+        "SendPushNotificationsiOSLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/firebaseController.sendPushNotificationsiOS",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-sendPushNotificationsiOS",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "SendPushNotificationsiOSLogGroup"
+            ]
+        },
+        "SendPushNotificationsAndroidLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/firebaseController.sendPushNotificationsAndroid",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-sendPushNotificationsAndroid",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "SendPushNotificationsAndroidLogGroup"
+            ]
+        },
+        "GetFirebaseCalculationsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/firebaseController.getFirebaseCalculations",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getFirebaseCalculations",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetFirebaseCalculationsLogGroup"
+            ]
+        },
+        "AddContactLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/notificationController.addContact",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-addContact",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "AddContactLogGroup"
+            ]
+        },
+        "GetNotificationsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/notificationController.getAllNotifications",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getNotifications",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetNotificationsLogGroup"
+            ]
+        },
+        "GetMessageBoardLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/notificationController.getMessages",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getMessageBoard",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetMessageBoardLogGroup"
+            ]
+        },
+        "GetGtNewsLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "ServerlessDeploymentBucket"
+                    },
+                    "S3Key": "serverless/iot-bus-geotab-test/dev/1662626454283-2022-09-08T08:40:54.283Z/iot-bus-geotab-test.zip"
+                },
+                "Handler": "controllers/notificationController.getGtNews",
+                "Runtime": "nodejs12.x",
+                "FunctionName": "iot-bus-geotab-test-dev-getGtNews",
+                "MemorySize": 320,
+                "Timeout": 6,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "IamRoleLambdaExecution",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "GetGtNewsLogGroup"
+            ]
+        },
+        "AppropriateBusListLambdaVersionmiz7jELhpM10f8R5zLUwIoZ252CzpLwMZa5FctOXhzQ": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "AppropriateBusListLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "AvailableRoutesLambdaVersion6PwXM18x13REv13v8bTZWdqeQRkvRTZRvDVuFkhjYY": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "AvailableRoutesLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "AvailableBusesLambdaVersionLF0x88pzfVutK51wmAldINiBYLnxJZgJVVDnCq0yxs": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "AvailableBusesLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetSelectedBusLambdaVersion0sNgfJ4Bz1sSqqmX84lInWcArOtFrWLvQzvdDEEk": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetSelectedBusLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetAllBusesLambdaVersionPsfGfAQQ63CHkiN31GZuYoXt8Ua1kAi7nCWlnM1RA": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetAllBusesLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetAllStaticDetailsLambdaVersion6DVhy0l31NCfjR0N5y2yHBQsSKbIag4UOCnsycwwCk": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetAllStaticDetailsLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetDriverRatingsLambdaVersion7Xd7nFmxte14gNeTnPrtzWCHEhlX50VkCvIfUGSOh8": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetDriverRatingsLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetBusesStationEtaDataLambdaVersion3LA3KrF0NJTzAOKlw854qGsBZbv8pTyWhaMzNgJhAnM": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetBusesStationEtaDataLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetBusesStationEtaDataCombineLambdaVersionzdAG9SWgRdmNbeVkTAAE6x9qu7q8U4ItwV2oyluIhw": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetBusesStationEtaDataCombineLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "UserGetStaticDetailsLambdaVersionVbhJc06NXNVTBdzk0ap4xYcDgSOpsWpZ3ZWplGdg": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "UserGetStaticDetailsLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GeoGetBusExceptionsLambdaVersionNJeH9XyDAwU5yjDrevjOv43b8dKt0lIplwXwp9tBy2M": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GeoGetBusExceptionsLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetBusLocationTraceLambdaVersionJlODwxHStCFupW7QlYuM8DP3Yv76Th57CegYmCEoHOo": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetBusLocationTraceLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetAllTrainStopsLambdaVersione2Oy9xkVXvsK4Eb0X3EXp2NCFW5pv6xvN4oAU1eIFpk": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetAllTrainStopsLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetTrainRouteLambdaVersionJUZinJ6JIkKrszLd3i620UXmtxwdls6C5B4nFoST94": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetTrainRouteLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetStopsWithin10kmLambdaVersionqN7NApxPmOpPHCdv91Ood5T8QZxMOom3VFpzm4dboY": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetStopsWithin10kmLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "RegisterFcmDeviceLambdaVersionB9PMF801GW37aDhFFFxheTNZDpwTSZYS8PBB0REoc": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "RegisterFcmDeviceLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "SendPushNotificationsiOSLambdaVersionyNHtgoFf6smFFMqTeOBa7KnUNhrg41kfKlVTihlbc": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "SendPushNotificationsiOSLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "SendPushNotificationsAndroidLambdaVersion4j7vMN1IpwmkV3E7duF2dWmBM5YinG9Cb8PTIobp8nE": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "SendPushNotificationsAndroidLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetFirebaseCalculationsLambdaVersionmbraaI8cFtgBrXbo7Y1gW7dQavwAUw8unJaaEG6vg": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetFirebaseCalculationsLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "AddContactLambdaVersion2DiWZqQSjMoo5fJfxH7V35oVbZVWcB419WiYND9m7Q": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "AddContactLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetNotificationsLambdaVersionagGMjYfTTd12V0fSEzNHE1CmduDHCLEC9AIm8x09cS8": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetNotificationsLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetMessageBoardLambdaVersionPSavVKsUg9xPoWANILBj4RmMgheNWRBKBUTCHtqpAtY": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetMessageBoardLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "GetGtNewsLambdaVersionoKXcpW4PUX5JWVSveAYhwaSt7wyOB2pQycm7mZJ40": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+                "FunctionName": {
+                    "Ref": "GetGtNewsLambdaFunction"
+                },
+                "CodeSha256": "EFgl5/6r0FG7zeMizJqVBg6vYKjaOzUCrCM6QMsRcFY="
+            }
+        },
+        "ApiGatewayRestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "Name": "dev-iot-bus-geotab-test",
+                "EndpointConfiguration": {
+                    "Types": [
+                        "EDGE"
+                    ]
+                },
+                "Policy": ""
+            }
+        },
+        "ApiGatewayResourceApi": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Fn::GetAtt": [
+                        "ApiGatewayRestApi",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "api",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiGetappropriatebuses": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "getAppropriateBuses",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiGetallroutesqueryparameters": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "getAllRoutesqueryParameters",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiAvailablebuses": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "availableBuses",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiGetbus": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "getBus",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiTracking": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "tracking",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiTrackingGetallbuses": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiTracking"
+                },
+                "PathPart": "getAllBuses",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiTrackingGetallstaticdetails": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiTracking"
+                },
+                "PathPart": "getAllStaticDetails",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiTrackingGetdriverratings": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiTracking"
+                },
+                "PathPart": "getDriverRatings",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiUser": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "user",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiUserGetbusesstationetadata": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiUser"
+                },
+                "PathPart": "getBusesStationEtaData",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiUserGetbusesstationetadatacombine": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiUser"
+                },
+                "PathPart": "getBusesStationEtaDataCombine",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiUserUsergetstaticdetails": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiUser"
+                },
+                "PathPart": "userGetStaticDetails",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiGeotabtracking": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "geoTabTracking",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiGeotabtrackingGetbusexceptions": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiGeotabtracking"
+                },
+                "PathPart": "getBusExceptions",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiGeotabtrackingGetbuslocationtrace": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiGeotabtracking"
+                },
+                "PathPart": "getBusLocationTrace",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiTrain": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "train",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiTrainGettrainstops": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiTrain"
+                },
+                "PathPart": "getTrainStops",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiTrainGettrainroute": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiTrain"
+                },
+                "PathPart": "getTrainRoute",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiTrainGetstopswithin10km": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiTrain"
+                },
+                "PathPart": "getStopsWithin10km",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiFirebasemodule": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "firebaseModule",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiFirebasemoduleRegisterfcmdevice": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemodule"
+                },
+                "PathPart": "registerFcmDevice",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiFirebasemoduleSendpushnotificationsios": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemodule"
+                },
+                "PathPart": "sendPushNotificationsiOS",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiFirebasemoduleSendpushnotificationsandroid": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemodule"
+                },
+                "PathPart": "sendPushNotificationsAndroid",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiFirebasemoduleGetfirebasecalculations": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemodule"
+                },
+                "PathPart": "getFirebaseCalculations",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiContact": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "contact",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiContactAdd": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiContact"
+                },
+                "PathPart": "add",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiNotifications": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApi"
+                },
+                "PathPart": "notifications",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiNotificationsGetall": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiNotifications"
+                },
+                "PathPart": "getAll",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiNotificationsGetmessages": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiNotifications"
+                },
+                "PathPart": "getMessages",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayResourceApiNotificationsGetgtnews": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "ParentId": {
+                    "Ref": "ApiGatewayResourceApiNotifications"
+                },
+                "PathPart": "getGtNews",
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiGetappropriatebusesOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiGetappropriatebuses"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiGetallroutesqueryparametersOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiGetallroutesqueryparameters"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiAvailablebusesOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiAvailablebuses"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiGetbusOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiGetbus"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiTrackingGetallbusesOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrackingGetallbuses"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiTrackingGetallstaticdetailsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrackingGetallstaticdetails"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiTrackingGetdriverratingsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrackingGetdriverratings"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiUserGetbusesstationetadataOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiUserGetbusesstationetadata"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiUserGetbusesstationetadatacombineOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiUserGetbusesstationetadatacombine"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiUserUsergetstaticdetailsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiUserUsergetstaticdetails"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiGeotabtrackingGetbusexceptionsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiGeotabtrackingGetbusexceptions"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiGeotabtrackingGetbuslocationtraceOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiGeotabtrackingGetbuslocationtrace"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiTrainGettrainstopsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrainGettrainstops"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiTrainGettrainrouteOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrainGettrainroute"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiTrainGetstopswithin10kmOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrainGetstopswithin10km"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiFirebasemoduleRegisterfcmdeviceOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemoduleRegisterfcmdevice"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiFirebasemoduleSendpushnotificationsiosOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemoduleSendpushnotificationsios"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiFirebasemoduleSendpushnotificationsandroidOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemoduleSendpushnotificationsandroid"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiFirebasemoduleGetfirebasecalculationsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemoduleGetfirebasecalculations"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiContactAddOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiContactAdd"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiNotificationsGetallOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,POST'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiNotificationsGetall"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiNotificationsGetmessagesOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiNotificationsGetmessages"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiNotificationsGetgtnewsOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "MethodResponses": [
+                    {
+                        "StatusCode": "200",
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Origin": true,
+                            "method.response.header.Access-Control-Allow-Headers": true,
+                            "method.response.header.Access-Control-Allow-Methods": true
+                        },
+                        "ResponseModels": {}
+                    }
+                ],
+                "RequestParameters": {},
+                "Integration": {
+                    "Type": "MOCK",
+                    "RequestTemplates": {
+                        "application/json": "{statusCode:200}"
+                    },
+                    "ContentHandling": "CONVERT_TO_TEXT",
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Origin": "'*'",
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                            },
+                            "ResponseTemplates": {
+                                "application/json": ""
+                            }
+                        }
+                    ]
+                },
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiNotificationsGetgtnews"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                }
+            }
+        },
+        "ApiGatewayMethodApiGetappropriatebusesPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiGetappropriatebuses"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "AppropriateBusListLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "AppropriateBusListLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiGetallroutesqueryparametersPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiGetallroutesqueryparameters"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "AvailableRoutesLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "AvailableRoutesLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiAvailablebusesPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiAvailablebuses"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "AvailableBusesLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "AvailableBusesLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiGetbusPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiGetbus"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetSelectedBusLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetSelectedBusLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiTrackingGetallbusesGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrackingGetallbuses"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetAllBusesLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetAllBusesLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiTrackingGetallstaticdetailsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrackingGetallstaticdetails"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetAllStaticDetailsLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetAllStaticDetailsLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiTrackingGetdriverratingsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrackingGetdriverratings"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetDriverRatingsLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetDriverRatingsLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiUserGetbusesstationetadataGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiUserGetbusesstationetadata"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetBusesStationEtaDataLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetBusesStationEtaDataLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiUserGetbusesstationetadatacombineGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiUserGetbusesstationetadatacombine"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetBusesStationEtaDataCombineLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetBusesStationEtaDataCombineLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiUserUsergetstaticdetailsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiUserUsergetstaticdetails"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "UserGetStaticDetailsLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "UserGetStaticDetailsLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiGeotabtrackingGetbusexceptionsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiGeotabtrackingGetbusexceptions"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GeoGetBusExceptionsLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GeoGetBusExceptionsLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiGeotabtrackingGetbuslocationtraceGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiGeotabtrackingGetbuslocationtrace"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetBusLocationTraceLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetBusLocationTraceLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiTrainGettrainstopsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrainGettrainstops"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetAllTrainStopsLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetAllTrainStopsLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiTrainGettrainrouteGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrainGettrainroute"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetTrainRouteLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetTrainRouteLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiTrainGetstopswithin10kmPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiTrainGetstopswithin10km"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetStopsWithin10kmLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetStopsWithin10kmLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiFirebasemoduleRegisterfcmdevicePost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemoduleRegisterfcmdevice"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "RegisterFcmDeviceLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "RegisterFcmDeviceLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiFirebasemoduleSendpushnotificationsiosPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemoduleSendpushnotificationsios"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "SendPushNotificationsiOSLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "SendPushNotificationsiOSLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiFirebasemoduleSendpushnotificationsandroidPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemoduleSendpushnotificationsandroid"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "SendPushNotificationsAndroidLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "SendPushNotificationsAndroidLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiFirebasemoduleGetfirebasecalculationsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiFirebasemoduleGetfirebasecalculations"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetFirebaseCalculationsLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetFirebaseCalculationsLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiContactAddPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiContactAdd"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "AddContactLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "AddContactLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiNotificationsGetallPost": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "POST",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiNotificationsGetall"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetNotificationsLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetNotificationsLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiNotificationsGetmessagesGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiNotificationsGetmessages"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetMessageBoardLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetMessageBoardLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayMethodApiNotificationsGetgtnewsGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "HttpMethod": "GET",
+                "RequestParameters": {},
+                "ResourceId": {
+                    "Ref": "ApiGatewayResourceApiNotificationsGetgtnews"
+                },
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "ApiKeyRequired": false,
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "GetGtNewsLambdaFunction",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    }
+                },
+                "MethodResponses": []
+            },
+            "DependsOn": [
+                "GetGtNewsLambdaPermissionApiGateway"
+            ]
+        },
+        "ApiGatewayDeployment1662626435577": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "ApiGatewayRestApi"
+                },
+                "StageName": "dev"
+            },
+            "DependsOn": [
+                "ApiGatewayMethodApiGetappropriatebusesOptions",
+                "ApiGatewayMethodApiGetallroutesqueryparametersOptions",
+                "ApiGatewayMethodApiAvailablebusesOptions",
+                "ApiGatewayMethodApiGetbusOptions",
+                "ApiGatewayMethodApiTrackingGetallbusesOptions",
+                "ApiGatewayMethodApiTrackingGetallstaticdetailsOptions",
+                "ApiGatewayMethodApiTrackingGetdriverratingsOptions",
+                "ApiGatewayMethodApiUserGetbusesstationetadataOptions",
+                "ApiGatewayMethodApiUserGetbusesstationetadatacombineOptions",
+                "ApiGatewayMethodApiUserUsergetstaticdetailsOptions",
+                "ApiGatewayMethodApiGeotabtrackingGetbusexceptionsOptions",
+                "ApiGatewayMethodApiGeotabtrackingGetbuslocationtraceOptions",
+                "ApiGatewayMethodApiTrainGettrainstopsOptions",
+                "ApiGatewayMethodApiTrainGettrainrouteOptions",
+                "ApiGatewayMethodApiTrainGetstopswithin10kmOptions",
+                "ApiGatewayMethodApiFirebasemoduleRegisterfcmdeviceOptions",
+                "ApiGatewayMethodApiFirebasemoduleSendpushnotificationsiosOptions",
+                "ApiGatewayMethodApiFirebasemoduleSendpushnotificationsandroidOptions",
+                "ApiGatewayMethodApiFirebasemoduleGetfirebasecalculationsOptions",
+                "ApiGatewayMethodApiContactAddOptions",
+                "ApiGatewayMethodApiNotificationsGetallOptions",
+                "ApiGatewayMethodApiNotificationsGetmessagesOptions",
+                "ApiGatewayMethodApiNotificationsGetgtnewsOptions",
+                "ApiGatewayMethodApiGetappropriatebusesPost",
+                "ApiGatewayMethodApiGetallroutesqueryparametersPost",
+                "ApiGatewayMethodApiAvailablebusesPost",
+                "ApiGatewayMethodApiGetbusPost",
+                "ApiGatewayMethodApiTrackingGetallbusesGet",
+                "ApiGatewayMethodApiTrackingGetallstaticdetailsGet",
+                "ApiGatewayMethodApiTrackingGetdriverratingsGet",
+                "ApiGatewayMethodApiUserGetbusesstationetadataGet",
+                "ApiGatewayMethodApiUserGetbusesstationetadatacombineGet",
+                "ApiGatewayMethodApiUserUsergetstaticdetailsGet",
+                "ApiGatewayMethodApiGeotabtrackingGetbusexceptionsGet",
+                "ApiGatewayMethodApiGeotabtrackingGetbuslocationtraceGet",
+                "ApiGatewayMethodApiTrainGettrainstopsGet",
+                "ApiGatewayMethodApiTrainGettrainrouteGet",
+                "ApiGatewayMethodApiTrainGetstopswithin10kmPost",
+                "ApiGatewayMethodApiFirebasemoduleRegisterfcmdevicePost",
+                "ApiGatewayMethodApiFirebasemoduleSendpushnotificationsiosPost",
+                "ApiGatewayMethodApiFirebasemoduleSendpushnotificationsandroidPost",
+                "ApiGatewayMethodApiFirebasemoduleGetfirebasecalculationsGet",
+                "ApiGatewayMethodApiContactAddPost",
+                "ApiGatewayMethodApiNotificationsGetallPost",
+                "ApiGatewayMethodApiNotificationsGetmessagesGet",
+                "ApiGatewayMethodApiNotificationsGetgtnewsGet"
+            ]
+        },
+        "AppropriateBusListLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "AppropriateBusListLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "AvailableRoutesLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "AvailableRoutesLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "AvailableBusesLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "AvailableBusesLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetSelectedBusLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetSelectedBusLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetAllBusesLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetAllBusesLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetAllStaticDetailsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetAllStaticDetailsLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetDriverRatingsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetDriverRatingsLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetBusesStationEtaDataLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetBusesStationEtaDataLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetBusesStationEtaDataCombineLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetBusesStationEtaDataCombineLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "UserGetStaticDetailsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "UserGetStaticDetailsLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GeoGetBusExceptionsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GeoGetBusExceptionsLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetBusLocationTraceLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetBusLocationTraceLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetAllTrainStopsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetAllTrainStopsLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetTrainRouteLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetTrainRouteLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetStopsWithin10kmLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetStopsWithin10kmLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "RegisterFcmDeviceLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "RegisterFcmDeviceLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "SendPushNotificationsiOSLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "SendPushNotificationsiOSLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "SendPushNotificationsAndroidLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "SendPushNotificationsAndroidLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetFirebaseCalculationsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetFirebaseCalculationsLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "AddContactLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "AddContactLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetNotificationsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetNotificationsLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetMessageBoardLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetMessageBoardLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "GetGtNewsLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "GetGtNewsLambdaFunction",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:",
+                            {
+                                "Ref": "AWS::Partition"
+                            },
+                            ":execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "ApiGatewayRestApi"
+                            },
+                            "/*/*"
+                        ]
+                    ]
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "ServerlessDeploymentBucketName": {
+            "Value": {
+                "Ref": "ServerlessDeploymentBucket"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-ServerlessDeploymentBucketName"
+            }
+        },
+        "AppropriateBusListLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "AppropriateBusListLambdaVersionmiz7jELhpM10f8R5zLUwIoZ252CzpLwMZa5FctOXhzQ"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-AppropriateBusListLambdaFunctionQualifiedArn"
+            }
+        },
+        "AvailableRoutesLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "AvailableRoutesLambdaVersion6PwXM18x13REv13v8bTZWdqeQRkvRTZRvDVuFkhjYY"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-AvailableRoutesLambdaFunctionQualifiedArn"
+            }
+        },
+        "AvailableBusesLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "AvailableBusesLambdaVersionLF0x88pzfVutK51wmAldINiBYLnxJZgJVVDnCq0yxs"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-AvailableBusesLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetSelectedBusLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetSelectedBusLambdaVersion0sNgfJ4Bz1sSqqmX84lInWcArOtFrWLvQzvdDEEk"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetSelectedBusLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetAllBusesLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetAllBusesLambdaVersionPsfGfAQQ63CHkiN31GZuYoXt8Ua1kAi7nCWlnM1RA"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetAllBusesLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetAllStaticDetailsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetAllStaticDetailsLambdaVersion6DVhy0l31NCfjR0N5y2yHBQsSKbIag4UOCnsycwwCk"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetAllStaticDetailsLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetDriverRatingsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetDriverRatingsLambdaVersion7Xd7nFmxte14gNeTnPrtzWCHEhlX50VkCvIfUGSOh8"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetDriverRatingsLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetBusesStationEtaDataLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetBusesStationEtaDataLambdaVersion3LA3KrF0NJTzAOKlw854qGsBZbv8pTyWhaMzNgJhAnM"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetBusesStationEtaDataLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetBusesStationEtaDataCombineLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetBusesStationEtaDataCombineLambdaVersionzdAG9SWgRdmNbeVkTAAE6x9qu7q8U4ItwV2oyluIhw"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetBusesStationEtaDataCombineLambdaFunctionQualifiedArn"
+            }
+        },
+        "UserGetStaticDetailsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "UserGetStaticDetailsLambdaVersionVbhJc06NXNVTBdzk0ap4xYcDgSOpsWpZ3ZWplGdg"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-UserGetStaticDetailsLambdaFunctionQualifiedArn"
+            }
+        },
+        "GeoGetBusExceptionsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GeoGetBusExceptionsLambdaVersionNJeH9XyDAwU5yjDrevjOv43b8dKt0lIplwXwp9tBy2M"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GeoGetBusExceptionsLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetBusLocationTraceLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetBusLocationTraceLambdaVersionJlODwxHStCFupW7QlYuM8DP3Yv76Th57CegYmCEoHOo"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetBusLocationTraceLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetAllTrainStopsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetAllTrainStopsLambdaVersione2Oy9xkVXvsK4Eb0X3EXp2NCFW5pv6xvN4oAU1eIFpk"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetAllTrainStopsLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetTrainRouteLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetTrainRouteLambdaVersionJUZinJ6JIkKrszLd3i620UXmtxwdls6C5B4nFoST94"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetTrainRouteLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetStopsWithin10kmLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetStopsWithin10kmLambdaVersionqN7NApxPmOpPHCdv91Ood5T8QZxMOom3VFpzm4dboY"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetStopsWithin10kmLambdaFunctionQualifiedArn"
+            }
+        },
+        "RegisterFcmDeviceLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "RegisterFcmDeviceLambdaVersionB9PMF801GW37aDhFFFxheTNZDpwTSZYS8PBB0REoc"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-RegisterFcmDeviceLambdaFunctionQualifiedArn"
+            }
+        },
+        "SendPushNotificationsiOSLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "SendPushNotificationsiOSLambdaVersionyNHtgoFf6smFFMqTeOBa7KnUNhrg41kfKlVTihlbc"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-SendPushNotificationsiOSLambdaFunctionQualifiedArn"
+            }
+        },
+        "SendPushNotificationsAndroidLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "SendPushNotificationsAndroidLambdaVersion4j7vMN1IpwmkV3E7duF2dWmBM5YinG9Cb8PTIobp8nE"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-SendPushNotificationsAndroidLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetFirebaseCalculationsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetFirebaseCalculationsLambdaVersionmbraaI8cFtgBrXbo7Y1gW7dQavwAUw8unJaaEG6vg"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetFirebaseCalculationsLambdaFunctionQualifiedArn"
+            }
+        },
+        "AddContactLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "AddContactLambdaVersion2DiWZqQSjMoo5fJfxH7V35oVbZVWcB419WiYND9m7Q"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-AddContactLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetNotificationsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetNotificationsLambdaVersionagGMjYfTTd12V0fSEzNHE1CmduDHCLEC9AIm8x09cS8"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetNotificationsLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetMessageBoardLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetMessageBoardLambdaVersionPSavVKsUg9xPoWANILBj4RmMgheNWRBKBUTCHtqpAtY"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetMessageBoardLambdaFunctionQualifiedArn"
+            }
+        },
+        "GetGtNewsLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+                "Ref": "GetGtNewsLambdaVersionoKXcpW4PUX5JWVSveAYhwaSt7wyOB2pQycm7mZJ40"
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-GetGtNewsLambdaFunctionQualifiedArn"
+            }
+        },
+        "ServiceEndpoint": {
+            "Description": "URL of the service endpoint",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Ref": "ApiGatewayRestApi"
+                        },
+                        ".execute-api.",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        ".",
+                        {
+                            "Ref": "AWS::URLSuffix"
+                        },
+                        "/dev"
+                    ]
+                ]
+            },
+            "Export": {
+                "Name": "sls-iot-bus-geotab-test-dev-ServiceEndpoint"
+            }
+        }
+    }
+}

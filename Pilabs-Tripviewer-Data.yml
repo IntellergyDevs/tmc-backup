@@ -1,0 +1,1529 @@
+{
+    "Description": "Trip Viewer Connection Configuration",
+    "Parameters": {
+        "TripViewerUsername": {
+            "Type": "String",
+            "Description": "MANDATORY - The username for your Trip Viewer account."
+        },
+        "TripViewerPassword": {
+            "Type": "String",
+            "Description": "OPTIONAL - The password for your Trip Viewer account. Only necessary when no Token is available.",
+            "NoEcho": true
+        },
+        "TripViewerToken": {
+            "Type": "String",
+            "Description": "OPTIONAL - Trip Viewer ID Token. Can be used instead of your password. Tokens expire one hour after their creation by the Trip Viewer."
+        }
+    },
+    "Resources": {
+        "pilabssecret939FA37F": {
+            "Type": "AWS::SecretsManager::Secret",
+            "Properties": {
+                "GenerateSecretString": {
+                    "GenerateStringKey": "random",
+                    "SecretStringTemplate": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "{\"username\":\"",
+                                {
+                                    "Ref": "TripViewerUsername"
+                                },
+                                "\",\"password\":\"",
+                                {
+                                    "Ref": "TripViewerPassword"
+                                },
+                                "\",\"idToken\":\"",
+                                {
+                                    "Ref": "TripViewerToken"
+                                },
+                                "\"}"
+                            ]
+                        ]
+                    }
+                },
+                "Name": "tripviewer-credentials",
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ]
+            },
+            "UpdateReplacePolicy": "Delete",
+            "DeletionPolicy": "Delete",
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-secret/Resource"
+            }
+        },
+        "pilabssetupcopylambdacodeServiceRoleD916134F": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-setup-copy-lambda-code/ServiceRole/Resource"
+            }
+        },
+        "pilabssetupcopylambdacodeServiceRoleDefaultPolicy016D55B2": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "s3:CreateBucket",
+                                "s3:ListBucket",
+                                "s3:DeleteBucket",
+                                "s3:PutObject",
+                                "s3:DeleteObject",
+                                "s3:ListObjects"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::temppilabslambdacode",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            }
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::temppilabslambdacode",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Action": [
+                                "s3:ListBucket",
+                                "s3:GetObject"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                "arn:aws:s3:::viewer.pi-labs.eu",
+                                "arn:aws:s3:::viewer.pi-labs.eu/*"
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "pilabssetupcopylambdacodeServiceRoleDefaultPolicy016D55B2",
+                "Roles": [
+                    {
+                        "Ref": "pilabssetupcopylambdacodeServiceRoleD916134F"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-setup-copy-lambda-code/ServiceRole/DefaultPolicy/Resource"
+            }
+        },
+        "pilabssetupcopylambdacode9BF488F6": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "ZipFile": "const AWS = require('aws-sdk');\nconst response = require('cfn-response');\n\nconst s3 = new AWS.S3({\n\tregion: process.env.AWS_REGION\n});\nconst s3Pilabs = new AWS.S3({\n\tregion: 'eu-west-1'\n});\n\nasync function asyncMethod() {\n\tconst bucketname = process.env.BUCKET_NAME;\n\tconst params = {\n\t\tBucket: bucketname\n\t};\n\tif (process.env.AWS_REGION !== 'us-east-1') {\n\t\tparams.CreateBucketConfiguration = {\n\t\t\tLocationConstraint: process.env.AWS_REGION\n\t\t};\n\t}\n\tconsole.log('params', JSON.stringify(params));\n\ttry {\n\t\tawait s3.createBucket(params).promise();\n\t} catch (e) {\n\t\tif (e.code !== 'BucketAlreadyOwnedByYou') {\n\t\t\tthrow e;\n\t\t}\n\t}\n\n\tconst keys = JSON.parse(process.env.KEYS);\n\tfor (const key of keys) {\n\t\tconst paramsCopy = {\n\t\t\tBucket: bucketname,\n\t\t\tCopySource: `/${process.env.SOURCE_BUCKET}/${key}`,\n\t\t\tKey: key\n\t\t};\n\t\tawait s3Pilabs.copyObject(paramsCopy).promise();\n\t}\n\treturn Promise.resolve(true);\n}\n\nconst deleteBucket = async () => {\n\tconst params = {\n\t\tBucket: process.env.BUCKET_NAME\n\t};\n\n\tconst list = await s3.listObjectsV2(params).promise();\n\tconsole.log(list);\n\tfor (const obj of list.Contents) {\n\t\tconst deleteParam = {Bucket: params.Bucket, Key: obj.Key};\n\n\t\tawait s3.deleteObject(deleteParam).promise();\n\t}\n\n\tawait s3.deleteBucket(params).promise();\n};\n\nexports.handler = (event, context) => {\n\tif (event.RequestType === 'Delete') {\n\t\tdeleteBucket()\n\t\t\t.then(() => {})\n\t\t\t.catch(e => {\n\t\t\t\tconsole.error(e);\n\t\t\t})\n\t\t\t.finally(() => {\n\t\t\t\tresponse.send(event, context, 'SUCCESS');\n\t\t\t});\n\t\treturn;\n\t}\n\tasyncMethod()\n\t\t.then(() => {\n\t\t\tresponse.send(event, context, 'SUCCESS');\n\t\t})\n\t\t.catch(e => {\n\t\t\tresponse.send(event, context, 'FAILED', e);\n\t\t});\n};\n"
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "pilabssetupcopylambdacodeServiceRoleD916134F",
+                        "Arn"
+                    ]
+                },
+                "Environment": {
+                    "Variables": {
+                        "KEYS": "[\"public/ocd/tripviewer-onboarding.zip\", \"public/ocd/tripviewer-finish-setup.zip\"]",
+                        "SOURCE_BUCKET": "viewer.pi-labs.eu",
+                        "BUCKET_NAME": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    "temppilabslambdacode",
+                                    {
+                                        "Ref": "AWS::AccountId"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                },
+                "FunctionName": "pilabs-setup-copy-lambda-code",
+                "Handler": "index.handler",
+                "Runtime": "nodejs12.x",
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ],
+                "Timeout": 30
+            },
+            "DependsOn": [
+                "pilabssetupcopylambdacodeServiceRoleDefaultPolicy016D55B2",
+                "pilabssetupcopylambdacodeServiceRoleD916134F"
+            ],
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-setup-copy-lambda-code/Resource"
+            }
+        },
+        "pilabsinvokecopysourcecodepermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "pilabssetupcopylambdacode9BF488F6"
+                },
+                "Principal": {
+                    "Ref": "AWS::AccountId"
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-invoke-copy-source-code-permission"
+            }
+        },
+        "pilabsinvokefunctioncopylambdacode": {
+            "Type": "AWS::CloudFormation::CustomResource",
+            "Properties": {
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "pilabssetupcopylambdacode9BF488F6",
+                        "Arn"
+                    ]
+                }
+            },
+            "UpdateReplacePolicy": "Delete",
+            "DeletionPolicy": "Delete",
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-invoke-function-copy-lambda-code/Default"
+            }
+        },
+        "pilabssetuptripviewerconnectionServiceRole3B9F847C": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-setup-trip-viewer-connection/ServiceRole/Resource"
+            }
+        },
+        "pilabssetuptripviewerconnectionServiceRoleDefaultPolicy6E69A960": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "secretsmanager:GetSecretValue",
+                            "Effect": "Allow",
+                            "Resource": {
+                                "Ref": "pilabssecret939FA37F"
+                            }
+                        },
+                        {
+                            "Action": [
+                                "s3:ListBucket",
+                                "s3:DeleteBucket"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": [
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::pilabs-at-",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            }
+                                        ]
+                                    ]
+                                },
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:aws:s3:::pilabs-at-",
+                                            {
+                                                "Ref": "AWS::AccountId"
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "Action": [
+                                "dynamodb:Scan",
+                                "dynamodb:DeleteTable"
+                            ],
+                            "Effect": "Allow",
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        "arn:aws:dynamodb:*:",
+                                        {
+                                            "Ref": "AWS::AccountId"
+                                        },
+                                        ":table/pilabs-trips-database"
+                                    ]
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "pilabssetuptripviewerconnectionServiceRoleDefaultPolicy6E69A960",
+                "Roles": [
+                    {
+                        "Ref": "pilabssetuptripviewerconnectionServiceRole3B9F847C"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-setup-trip-viewer-connection/ServiceRole/DefaultPolicy/Resource"
+            }
+        },
+        "pilabssetuptripviewerconnectionB9C5B404": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "temppilabslambdacode",
+                                {
+                                    "Ref": "AWS::AccountId"
+                                }
+                            ]
+                        ]
+                    },
+                    "S3Key": "public/ocd/tripviewer-onboarding.zip"
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "pilabssetuptripviewerconnectionServiceRole3B9F847C",
+                        "Arn"
+                    ]
+                },
+                "Environment": {
+                    "Variables": {
+                        "FUNCTION_ARN": "arn:aws:lambda:eu-west-1:131799693791:function:prod-eu-west-1-function-addCustomerAWSAccountInfo",
+                        "IDENTITY_POOL_ID": "eu-west-1:4543f62a-d1b7-453f-a0bd-61d07a6a0dbf",
+                        "USER_POOL_ID": "eu-west-1_5iJ318DGa",
+                        "USER_POOL_CLIENT_ID": "2j2195ok5rsmhlkmdtc4ffiprq",
+                        "LOGIN_KEY": "cognito-idp.eu-west-1.amazonaws.com/eu-west-1_5iJ318DGa",
+                        "SECRETE_NAME": "tripviewer-credentials"
+                    }
+                },
+                "FunctionName": "pilabs-setup-trip-viewer-connection",
+                "Handler": "index.handler",
+                "Runtime": "nodejs12.x",
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ],
+                "Timeout": 30
+            },
+            "DependsOn": [
+                "pilabsinvokefunctioncopylambdacode",
+                "pilabssetuptripviewerconnectionServiceRoleDefaultPolicy6E69A960",
+                "pilabssetuptripviewerconnectionServiceRole3B9F847C"
+            ],
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-setup-trip-viewer-connection/Resource"
+            }
+        },
+        "pilabsinvokefuncpermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "pilabssetuptripviewerconnectionB9C5B404"
+                },
+                "Principal": {
+                    "Ref": "AWS::AccountId"
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-invoke-func-permission"
+            }
+        },
+        "pilabsinvokefunction": {
+            "Type": "AWS::CloudFormation::CustomResource",
+            "Properties": {
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "pilabssetuptripviewerconnectionB9C5B404",
+                        "Arn"
+                    ]
+                }
+            },
+            "UpdateReplacePolicy": "Delete",
+            "DeletionPolicy": "Delete",
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-invoke-function/Default"
+            }
+        },
+        "pilabsbucket7CA5AE2F": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "pilabs-at-",
+                            {
+                                "Ref": "AWS::AccountId"
+                            }
+                        ]
+                    ]
+                },
+                "LifecycleConfiguration": {
+                    "Rules": [
+                        {
+                            "ExpirationInDays": 731,
+                            "Id": "Delete any data older than 2 years",
+                            "Status": "Enabled"
+                        }
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ]
+            },
+            "DependsOn": [
+                "pilabsinvokefunction"
+            ],
+            "UpdateReplacePolicy": "Retain",
+            "DeletionPolicy": "Retain",
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-bucket/Resource"
+            }
+        },
+        "pilabsbucketPolicy14ABF3F7": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": {
+                    "Ref": "pilabsbucket7CA5AE2F"
+                },
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "s3:PutObject*",
+                                "s3:Abort*"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:",
+                                            {
+                                                "Ref": "AWS::Partition"
+                                            },
+                                            ":iam::131799693791:root"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        {
+                                            "Fn::GetAtt": [
+                                                "pilabsbucket7CA5AE2F",
+                                                "Arn"
+                                            ]
+                                        },
+                                        "/*"
+                                    ]
+                                ]
+                            }
+                        },
+                        {
+                            "Action": "s3:DeleteObject*",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:",
+                                            {
+                                                "Ref": "AWS::Partition"
+                                            },
+                                            ":iam::131799693791:root"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [
+                                        {
+                                            "Fn::GetAtt": [
+                                                "pilabsbucket7CA5AE2F",
+                                                "Arn"
+                                            ]
+                                        },
+                                        "/*"
+                                    ]
+                                ]
+                            }
+                        },
+                        {
+                            "Action": [
+                                "s3:GetObject*",
+                                "s3:GetBucket*",
+                                "s3:List*",
+                                "s3:DeleteObject*",
+                                "s3:PutObject*",
+                                "s3:Abort*"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:",
+                                            {
+                                                "Ref": "AWS::Partition"
+                                            },
+                                            ":iam::131799693791:root"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "Resource": [
+                                {
+                                    "Fn::GetAtt": [
+                                        "pilabsbucket7CA5AE2F",
+                                        "Arn"
+                                    ]
+                                },
+                                {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "pilabsbucket7CA5AE2F",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-bucket/Policy/Resource"
+            }
+        },
+        "pilabstopic9AF1D621": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+                "DisplayName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "pilabs-at-",
+                            {
+                                "Ref": "AWS::AccountId"
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ],
+                "TopicName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "pilabs-at-",
+                            {
+                                "Ref": "AWS::AccountId"
+                            }
+                        ]
+                    ]
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-topic/Resource"
+            }
+        },
+        "pilabstopicPolicyBF6A75AF": {
+            "Type": "AWS::SNS::TopicPolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sns:Publish",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:",
+                                            {
+                                                "Ref": "AWS::Partition"
+                                            },
+                                            ":iam::131799693791:root"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "Resource": {
+                                "Ref": "pilabstopic9AF1D621"
+                            },
+                            "Sid": "0"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Topics": [
+                    {
+                        "Ref": "pilabstopic9AF1D621"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-topic/Policy/Resource"
+            }
+        },
+        "pilabstripstopicF0190C6B": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+                "DisplayName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "pilabs-trips-at-",
+                            {
+                                "Ref": "AWS::AccountId"
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ],
+                "TopicName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "pilabs-trips-at-",
+                            {
+                                "Ref": "AWS::AccountId"
+                            }
+                        ]
+                    ]
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-trips-topic/Resource"
+            }
+        },
+        "pilabstripstopicPolicy9355E3F8": {
+            "Type": "AWS::SNS::TopicPolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sns:Publish",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:",
+                                            {
+                                                "Ref": "AWS::Partition"
+                                            },
+                                            ":iam::131799693791:root"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "Resource": {
+                                "Ref": "pilabstripstopicF0190C6B"
+                            },
+                            "Sid": "0"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Topics": [
+                    {
+                        "Ref": "pilabstripstopicF0190C6B"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-trips-topic/Policy/Resource"
+            }
+        },
+        "pilabsxcalltopic5662622B": {
+            "Type": "AWS::SNS::Topic",
+            "Properties": {
+                "DisplayName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "pilabs-xcall-at-",
+                            {
+                                "Ref": "AWS::AccountId"
+                            }
+                        ]
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ],
+                "TopicName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "pilabs-xcall-at-",
+                            {
+                                "Ref": "AWS::AccountId"
+                            }
+                        ]
+                    ]
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-xcall-topic/Resource"
+            }
+        },
+        "pilabsxcalltopicPolicy1B7057C3": {
+            "Type": "AWS::SNS::TopicPolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sns:Publish",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "arn:",
+                                            {
+                                                "Ref": "AWS::Partition"
+                                            },
+                                            ":iam::131799693791:root"
+                                        ]
+                                    ]
+                                }
+                            },
+                            "Resource": {
+                                "Ref": "pilabsxcalltopic5662622B"
+                            },
+                            "Sid": "0"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Topics": [
+                    {
+                        "Ref": "pilabsxcalltopic5662622B"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-xcall-topic/Policy/Resource"
+            }
+        },
+        "pilabstripsdatabaseE9609545": {
+            "Type": "AWS::DynamoDB::Table",
+            "Properties": {
+                "KeySchema": [
+                    {
+                        "AttributeName": "tripId",
+                        "KeyType": "HASH"
+                    }
+                ],
+                "AttributeDefinitions": [
+                    {
+                        "AttributeName": "tripId",
+                        "AttributeType": "S"
+                    },
+                    {
+                        "AttributeName": "imei",
+                        "AttributeType": "S"
+                    }
+                ],
+                "BillingMode": "PAY_PER_REQUEST",
+                "GlobalSecondaryIndexes": [
+                    {
+                        "IndexName": "imei",
+                        "KeySchema": [
+                            {
+                                "AttributeName": "imei",
+                                "KeyType": "HASH"
+                            }
+                        ],
+                        "Projection": {
+                            "ProjectionType": "ALL"
+                        }
+                    }
+                ],
+                "TableName": "pilabs-trips-database",
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ],
+                "TimeToLiveSpecification": {
+                    "AttributeName": "tripExpirationTime",
+                    "Enabled": true
+                }
+            },
+            "DependsOn": [
+                "pilabsinvokefunction"
+            ],
+            "UpdateReplacePolicy": "Retain",
+            "DeletionPolicy": "Retain",
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-trips-database/Resource"
+            }
+        },
+        "pilabsdeliverystreamrole76832AA2": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "firehose.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "Policies": [
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": "logs:CreateLogGroup",
+                                    "Effect": "Allow",
+                                    "Resource": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:logs:*:",
+                                                {
+                                                    "Ref": "AWS::AccountId"
+                                                },
+                                                ":*"
+                                            ]
+                                        ]
+                                    }
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "CreateLog"
+                    },
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "logs:CreateLogStream",
+                                        "logs:PutLogEvents"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": {
+                                        "Fn::Join": [
+                                            "",
+                                            [
+                                                "arn:aws:logs:*:",
+                                                {
+                                                    "Ref": "AWS::AccountId"
+                                                },
+                                                ":log-group:/aws/kinesisfirehose/pilabs-at-",
+                                                {
+                                                    "Ref": "AWS::AccountId"
+                                                },
+                                                ":log-stream:*"
+                                            ]
+                                        ]
+                                    }
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "Logs"
+                    },
+                    {
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "s3:AbortMultipartUpload",
+                                        "s3:GetBucketLocation",
+                                        "s3:GetObject",
+                                        "s3:ListBucket",
+                                        "s3:ListBucketMultipartUploads",
+                                        "s3:PutObject"
+                                    ],
+                                    "Effect": "Allow",
+                                    "Resource": [
+                                        {
+                                            "Fn::GetAtt": [
+                                                "pilabsbucket7CA5AE2F",
+                                                "Arn"
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::GetAtt": [
+                                                            "pilabsbucket7CA5AE2F",
+                                                            "Arn"
+                                                        ]
+                                                    },
+                                                    "/*"
+                                                ]
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        },
+                        "PolicyName": "S3"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-delivery-stream-role/Resource"
+            }
+        },
+        "pilabsfirehose": {
+            "Type": "AWS::KinesisFirehose::DeliveryStream",
+            "Properties": {
+                "DeliveryStreamName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "pilabs-at-",
+                            {
+                                "Ref": "AWS::AccountId"
+                            }
+                        ]
+                    ]
+                },
+                "ExtendedS3DestinationConfiguration": {
+                    "BucketARN": {
+                        "Fn::GetAtt": [
+                            "pilabsbucket7CA5AE2F",
+                            "Arn"
+                        ]
+                    },
+                    "BufferingHints": {
+                        "IntervalInSeconds": 300,
+                        "SizeInMBs": 5
+                    },
+                    "Prefix": "raw/",
+                    "RoleARN": {
+                        "Fn::GetAtt": [
+                            "pilabsdeliverystreamrole76832AA2",
+                            "Arn"
+                        ]
+                    }
+                },
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ]
+            },
+            "DependsOn": [
+                "pilabsinvokefunction"
+            ],
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-firehose"
+            }
+        },
+        "pilabsfirehoseFunctionServiceRoleCD364A87": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-firehoseFunction/ServiceRole/Resource"
+            }
+        },
+        "pilabsfirehoseFunctionServiceRoleDefaultPolicy0A118BB7": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "firehose:PutRecordBatch",
+                            "Effect": "Allow",
+                            "Resource": {
+                                "Fn::GetAtt": [
+                                    "pilabsfirehose",
+                                    "Arn"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "pilabsfirehoseFunctionServiceRoleDefaultPolicy0A118BB7",
+                "Roles": [
+                    {
+                        "Ref": "pilabsfirehoseFunctionServiceRoleCD364A87"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-firehoseFunction/ServiceRole/DefaultPolicy/Resource"
+            }
+        },
+        "pilabsfirehoseFunctionC30E91FA": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "ZipFile": "const AWS = require('aws-sdk');\nAWS.config.update({region: process.env.AWS_REGION});\n\nconst firehose = new AWS.Firehose({\n\tregion: process.env.AWS_REGION\n});\nconst account = process.env.ACCOUNT;\n\nexports.handler = function(event) {\n\tconst records = event.Records.map(r => ({Data: Buffer.from(`${r.Sns.Message}\n`)}));\n\tconst params = {\n\t\tDeliveryStreamName: `pilabs-at-${account}`,\n\t\tRecords: records\n\t};\n\n\treturn firehose\n\t\t.putRecordBatch(params)\n\t\t.promise()\n\t\t.then(() => {\n\t\t\treturn true;\n\t\t})\n\t\t.catch(error => {\n\t\t\tconsole.error(error);\n\t\t\tthrow error;\n\t\t});\n};\n"
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "pilabsfirehoseFunctionServiceRoleCD364A87",
+                        "Arn"
+                    ]
+                },
+                "Environment": {
+                    "Variables": {
+                        "ACCOUNT": {
+                            "Ref": "AWS::AccountId"
+                        }
+                    }
+                },
+                "FunctionName": "pilabs-firehoseFunction",
+                "Handler": "index.handler",
+                "Runtime": "nodejs12.x",
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ],
+                "Timeout": 30
+            },
+            "DependsOn": [
+                "pilabsfirehoseFunctionServiceRoleDefaultPolicy0A118BB7",
+                "pilabsfirehoseFunctionServiceRoleCD364A87"
+            ],
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-firehoseFunction/Resource"
+            }
+        },
+        "pilabsfirehoseFunctionAllowInvokeOcdStackpilabstopic7EB24F8AF8350CC7": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "pilabsfirehoseFunctionC30E91FA",
+                        "Arn"
+                    ]
+                },
+                "Principal": "sns.amazonaws.com",
+                "SourceArn": {
+                    "Ref": "pilabstopic9AF1D621"
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-firehoseFunction/AllowInvoke:OcdStackpilabstopic7EB24F8A"
+            }
+        },
+        "pilabsfirehoseFunctionpilabstopic23487BAC": {
+            "Type": "AWS::SNS::Subscription",
+            "Properties": {
+                "Protocol": "lambda",
+                "TopicArn": {
+                    "Ref": "pilabstopic9AF1D621"
+                },
+                "Endpoint": {
+                    "Fn::GetAtt": [
+                        "pilabsfirehoseFunctionC30E91FA",
+                        "Arn"
+                    ]
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-firehoseFunction/pilabs-topic/Resource"
+            }
+        },
+        "tripviewerdynamodbinsertfunctionServiceRoleCCCAD87B": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/tripviewer-dynamodb-insert-function/ServiceRole/Resource"
+            }
+        },
+        "tripviewerdynamodbinsertfunctionServiceRoleDefaultPolicyE7131AD6": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "dynamodb:BatchWriteItem",
+                            "Effect": "Allow",
+                            "Resource": {
+                                "Fn::GetAtt": [
+                                    "pilabstripsdatabaseE9609545",
+                                    "Arn"
+                                ]
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "tripviewerdynamodbinsertfunctionServiceRoleDefaultPolicyE7131AD6",
+                "Roles": [
+                    {
+                        "Ref": "tripviewerdynamodbinsertfunctionServiceRoleCCCAD87B"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/tripviewer-dynamodb-insert-function/ServiceRole/DefaultPolicy/Resource"
+            }
+        },
+        "tripviewerdynamodbinsertfunction928D041C": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "ZipFile": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "const AWS = require('aws-sdk');\nconst dynamodb = new AWS.DynamoDB({\n\tregion: process.env.AWS_REGION\n});\n\nfunction saveToDynamoDB(item) {\n\treturn {\n\t\tPutRequest: {\n\t\t\tItem: JSON.parse(item)\n\t\t}\n\t};\n}\n\nexports.handler = async event => {\n\tconst items = [];\n\tfor (const r of event.Records) {\n\t\titems.push(saveToDynamoDB(r.Sns.Message));\n\t}\n\n\tconst params = {\n\t\tRequestItems: {\n\t\t\t'",
+                                {
+                                    "Ref": "pilabstripsdatabaseE9609545"
+                                },
+                                "': [...items]\n\t\t}\n\t};\n\n\treturn dynamodb.batchWriteItem(params).promise();\n};\n"
+                            ]
+                        ]
+                    }
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "tripviewerdynamodbinsertfunctionServiceRoleCCCAD87B",
+                        "Arn"
+                    ]
+                },
+                "FunctionName": "tripviewer-dynamodb-insert-function",
+                "Handler": "index.handler",
+                "Runtime": "nodejs12.x",
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ],
+                "Timeout": 30
+            },
+            "DependsOn": [
+                "tripviewerdynamodbinsertfunctionServiceRoleDefaultPolicyE7131AD6",
+                "tripviewerdynamodbinsertfunctionServiceRoleCCCAD87B"
+            ],
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/tripviewer-dynamodb-insert-function/Resource"
+            }
+        },
+        "tripviewerdynamodbinsertfunctionAllowInvokeOcdStackpilabstripstopicC73B701E54182CAD": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "tripviewerdynamodbinsertfunction928D041C",
+                        "Arn"
+                    ]
+                },
+                "Principal": "sns.amazonaws.com",
+                "SourceArn": {
+                    "Ref": "pilabstripstopicF0190C6B"
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/tripviewer-dynamodb-insert-function/AllowInvoke:OcdStackpilabstripstopicC73B701E"
+            }
+        },
+        "tripviewerdynamodbinsertfunctionpilabstripstopic24CCEF10": {
+            "Type": "AWS::SNS::Subscription",
+            "Properties": {
+                "Protocol": "lambda",
+                "TopicArn": {
+                    "Ref": "pilabstripstopicF0190C6B"
+                },
+                "Endpoint": {
+                    "Fn::GetAtt": [
+                        "tripviewerdynamodbinsertfunction928D041C",
+                        "Arn"
+                    ]
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/tripviewer-dynamodb-insert-function/pilabs-trips-topic/Resource"
+            }
+        },
+        "pilabsfinishSetupFuncionServiceRole64C6ADD4": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "sts:AssumeRole",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": "lambda.amazonaws.com"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "ManagedPolicyArns": [
+                    {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "arn:",
+                                {
+                                    "Ref": "AWS::Partition"
+                                },
+                                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                            ]
+                        ]
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-finishSetupFuncion/ServiceRole/Resource"
+            }
+        },
+        "pilabsfinishSetupFuncionServiceRoleDefaultPolicyED620A88": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": "secretsmanager:GetSecretValue",
+                            "Effect": "Allow",
+                            "Resource": {
+                                "Ref": "pilabssecret939FA37F"
+                            }
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                },
+                "PolicyName": "pilabsfinishSetupFuncionServiceRoleDefaultPolicyED620A88",
+                "Roles": [
+                    {
+                        "Ref": "pilabsfinishSetupFuncionServiceRole64C6ADD4"
+                    }
+                ]
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-finishSetupFuncion/ServiceRole/DefaultPolicy/Resource"
+            }
+        },
+        "pilabsfinishSetupFuncion797D8E11": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "temppilabslambdacode",
+                                {
+                                    "Ref": "AWS::AccountId"
+                                }
+                            ]
+                        ]
+                    },
+                    "S3Key": "public/ocd/tripviewer-finish-setup.zip"
+                },
+                "Role": {
+                    "Fn::GetAtt": [
+                        "pilabsfinishSetupFuncionServiceRole64C6ADD4",
+                        "Arn"
+                    ]
+                },
+                "Environment": {
+                    "Variables": {
+                        "FUNCTION_ARN": "arn:aws:lambda:eu-west-1:131799693791:function:prod-eu-west-1-function-addCustomerAWSAccountInfo",
+                        "IDENTITY_POOL_ID": "eu-west-1:4543f62a-d1b7-453f-a0bd-61d07a6a0dbf",
+                        "USER_POOL_ID": "eu-west-1_5iJ318DGa",
+                        "USER_POOL_CLIENT_ID": "2j2195ok5rsmhlkmdtc4ffiprq",
+                        "LOGIN_KEY": "cognito-idp.eu-west-1.amazonaws.com/eu-west-1_5iJ318DGa",
+                        "SECRETE_NAME": "tripviewer-credentials"
+                    }
+                },
+                "FunctionName": "pilabs-finish-setup",
+                "Handler": "index.handler",
+                "Runtime": "nodejs12.x",
+                "Tags": [
+                    {
+                        "Key": "pilabs:application",
+                        "Value": "Trip Viewer"
+                    }
+                ],
+                "Timeout": 30
+            },
+            "DependsOn": [
+                "pilabsfinishSetupFuncionServiceRoleDefaultPolicyED620A88",
+                "pilabsfinishSetupFuncionServiceRole64C6ADD4",
+                "pilabsinvokefunctioncopylambdacode"
+            ],
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-finishSetupFuncion/Resource"
+            }
+        },
+        "pilabsinvokefinishfuncpermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:InvokeFunction",
+                "FunctionName": {
+                    "Ref": "pilabsfinishSetupFuncion797D8E11"
+                },
+                "Principal": {
+                    "Ref": "AWS::AccountId"
+                }
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-invoke-finish-func-permission"
+            }
+        },
+        "pilabsinvokefinishfunction": {
+            "Type": "AWS::CloudFormation::CustomResource",
+            "Properties": {
+                "ServiceToken": {
+                    "Fn::GetAtt": [
+                        "pilabsfinishSetupFuncion797D8E11",
+                        "Arn"
+                    ]
+                }
+            },
+            "DependsOn": [
+                "pilabsbucket7CA5AE2F",
+                "pilabsfirehose",
+                "pilabsfirehoseFunctionC30E91FA",
+                "pilabstopic9AF1D621",
+                "pilabstripsdatabaseE9609545",
+                "pilabstripstopicF0190C6B",
+                "tripviewerdynamodbinsertfunction928D041C"
+            ],
+            "UpdateReplacePolicy": "Delete",
+            "DeletionPolicy": "Delete",
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/pilabs-invoke-finish-function/Default"
+            }
+        },
+        "CDKMetadata": {
+            "Type": "AWS::CDK::Metadata",
+            "Properties": {
+                "Analytics": "v2:deflate64:H4sIAAAAAAAAA02RTU7DMBCFz8LedamKkNghirqOEi7gOFOYJrarGbsosnx37BhINp7vzZs/yQf5cpSPD6/qm3d6GPdROwIZO6/0KE4X2yhSBjyQOAX2zrTALpCG4v3zmnSWPQXtkygDI4Mm8GyUVZ9AeeyiS2+lJCZl+kHJeA5We3S2eFtugAwyZ5UEKiNj66a6vMTGTajnpW6hJPgo41vQY93ySzWsxVudWyzL+OFuqItXYXnXhq3sQs+a8PZ34VYnMcxWGTf0eaLq66ULJDGiBUa+IMGXY5DZeYcJ70Bz5wmUSUlYN4C88v5+eJKH5/wvV0bcUbAeDci2xh8Wekr1swEAAA=="
+            },
+            "Metadata": {
+                "aws:cdk:path": "OcdStack/CDKMetadata/Default"
+            }
+        }
+    }
+}
